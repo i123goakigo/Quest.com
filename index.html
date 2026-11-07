@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pocket Quizzes – Quiz games with a pet to raise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1b2140;--sky:#eef3ff;--white:#fff;--blue:#3556ff;--blue-d:#2239c4;--sun:#ffc933;--sun-d:#d9a200;--mint:#23c48e;--mint-d:#139a6e;--coral:#ff5d6c;--coral-d:#d63c4b;--muted:#5b6385;--line:#d7defa}
+@media(prefers-color-scheme:dark){:root{--ink:#eef1ff;--sky:#12172e;--white:#1c2344;--muted:#a3acd6;--line:#2e376a}}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',system-ui,sans-serif;background:var(--sky);color:var(--ink);line-height:1.55;font-size:17px}
+h1,h2,h3,button,.logo{font-family:'Fredoka','Nunito',sans-serif}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{padding:16px 0}
+header .wrap{display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:700;font-size:1.5rem;color:var(--ink);text-decoration:none;display:flex;gap:8px;align-items:center}
+.logo i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--sun);color:#1b2140;font-style:normal;transform:rotate(-6deg)}
+.btn{font-weight:600;font-size:1.05rem;border:0;cursor:pointer;color:#fff;background:var(--blue);padding:12px 22px;border-radius:14px;box-shadow:0 5px 0 var(--blue-d);text-decoration:none;display:inline-block;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(5px);box-shadow:none}
+.btn.sun{background:var(--sun);color:#1b2140;box-shadow:0 5px 0 var(--sun-d)}
+.btn.mint{background:var(--mint);box-shadow:0 5px 0 var(--mint-d)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn.sm{padding:8px 16px;font-size:.95rem}
+.hero{display:grid;grid-template-columns:1fr 1.1fr;gap:36px;align-items:start;padding:20px 0 60px}
+@media(max-width:860px){.hero{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.4rem);line-height:1.08;letter-spacing:-.5px;margin-top:14px}
+.hero h1 span{background:linear-gradient(transparent 62%,var(--sun) 62%)}
+.lead{margin:16px 0 22px;color:var(--muted);font-size:1.12rem;max-width:30em}
+.ticks{list-style:none;padding:0;margin-top:22px;display:grid;gap:6px;font-weight:800}
+.ticks li::before{content:"✓";color:var(--mint);margin-right:8px}
+
+/* game card */
+.card{background:var(--white);border-radius:24px;padding:20px;border:2px solid var(--line);box-shadow:0 8px 0 var(--line)}
+.petbar{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.petbox{position:relative;width:104px;flex:none}
+#pet{width:104px;height:104px;display:block;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+#pet.hop{animation:hop .5s}
+@keyframes hop{30%{transform:translateY(-16px) scale(1.05)}}
+#pet.sadmove{animation:sadm .6s}
+@keyframes sadm{30%{transform:translateY(5px) scaleY(.9)}}
+#hat{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:2rem;pointer-events:none}
+.stats{flex:1;min-width:0}
+.stats b.nm{font-family:'Fredoka';font-size:1.2rem}
+.stats small{color:var(--muted);font-weight:800;margin-left:6px}
+.bar{height:12px;border-radius:99px;background:var(--line);overflow:hidden;margin:5px 0}
+.bar b{display:block;height:100%;width:0;background:var(--mint);border-radius:99px;transition:width .3s}
+.xp{background:var(--sun)!important}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pills span{background:var(--sky);border:2px solid var(--line);border-radius:99px;padding:0 10px;font-weight:800;font-size:.88rem}
+#say{font-weight:800;font-size:.95rem;color:var(--muted);margin-top:6px;min-height:1.4em}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:2px solid var(--line);background:transparent;color:var(--ink);padding:5px 13px;border-radius:999px;cursor:pointer;font-size:.93rem;font-weight:500}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.lv{border:2px solid var(--line);background:var(--sky);color:var(--ink);border-radius:12px;padding:6px 2px;cursor:pointer;line-height:1.2}
+.lv small{display:block;font-family:'Nunito';font-weight:800;font-size:.72rem;color:var(--muted)}
+.lv[aria-pressed=true]{border-color:var(--blue);box-shadow:0 3px 0 var(--blue)}
+.lv.lock{opacity:.75}
+.shop{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-bottom:14px}
+.shop button{border:2px solid var(--line);background:var(--sky);color:var(--ink);border-radius:12px;padding:8px 4px;cursor:pointer;font-size:.9rem}
+.shop button span{display:block;font-size:1.6rem}
+.shop button small{font-family:'Nunito';font-weight:800;color:var(--muted)}
+.meta{display:flex;justify-content:space-between;margin:8px 0 4px;font-weight:800;color:var(--muted);font-size:.95rem}
+.q{font-family:'Fredoka';font-size:clamp(1.5rem,4vw,2.1rem);font-weight:600;min-height:3em;display:flex;align-items:center;line-height:1.2;margin:6px 0 12px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{font-size:1.2rem;font-weight:600;padding:14px 8px;border-radius:14px;border:2px solid var(--line);background:var(--sky);color:var(--ink);cursor:pointer;box-shadow:0 4px 0 var(--line)}
+.opt:hover:not(:disabled){border-color:var(--blue)}
+.opt.right{background:var(--mint);border-color:var(--mint-d);color:#06241a;box-shadow:0 4px 0 var(--mint-d)}
+.opt.wrong{background:var(--coral);border-color:var(--coral-d);color:#fff;box-shadow:0 4px 0 var(--coral-d)}
+.fb{min-height:2.6em;margin-top:12px;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.res{text-align:center;padding:6px 0}
+.stars{font-size:2.3rem;letter-spacing:6px}
+.res h3{font-size:1.9rem}
+.res p{color:var(--muted);margin:6px 0 12px}
+.res input{font:inherit;padding:9px 14px;border-radius:12px;border:2px solid var(--line);background:var(--sky);color:var(--ink);width:min(260px,100%);margin-bottom:12px}
+.res .row{justify-content:center}
+
+section{padding:50px 0}
+section h2{font-size:clamp(1.7rem,4vw,2.3rem);line-height:1.15;margin-bottom:8px}
+.sub{color:var(--muted);max-width:36em;margin-bottom:26px}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:760px}
+.plan{background:var(--white);border:2px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.plan.pro{background:var(--blue);border-color:var(--blue);color:#fff}
+.plan ul{list-style:none;padding:0;display:grid;gap:6px;flex:1}
+.plan li::before{content:"✓ ";font-weight:800}
+.price{font-family:'Fredoka';font-size:2.2rem;font-weight:700}
+details{background:var(--white);border:2px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:10px;max-width:760px}
+summary{cursor:pointer;font-weight:800}
+details p{color:var(--muted);margin-top:8px}
+footer{padding:30px 0 50px;color:var(--muted);font-size:.9rem;text-align:center}
+dialog{border:0;border-radius:24px;padding:28px;max-width:420px;width:92%;background:var(--white);color:var(--ink);margin:auto}
+dialog::backdrop{background:rgba(10,14,40,.65)}
+dialog h2{font-size:1.7rem}
+dialog ul{margin:12px 0 16px 20px;display:grid;gap:4px}
+dialog input{font:inherit;padding:9px 12px;border-radius:12px;border:2px solid var(--line);background:var(--sky);color:var(--ink);width:100%;margin:6px 0}
+#payMsg{font-weight:800;min-height:1.5em;font-size:.95rem}
+#cert{display:none}
+@media print{
+ body>*:not(#cert){display:none!important}
+ #cert{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:96vh;border:14px double #3556ff;color:#1b2140;font-family:'Fredoka',sans-serif;background:#fff}
+ #cert h1{font-size:3rem;color:#3556ff}
+ #cert .nm{font-size:2.6rem;border-bottom:3px solid #ffc933;padding:0 40px;margin:16px 0}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="logo" href="#top"><i>?</i><span class="brand"></span></a>
+  <a class="btn sun sm" href="#plans">Go Pro</a>
+</div></header>
+
+<main id="top">
+<div class="wrap hero">
+  <div>
+    <h1>Raise a pet by <span>answering quizzes.</span></h1>
+    <p class="lead">Every right answer feeds your pet, earns coins and grows its level. Four levels per topic, from Easy to Boss. Don’t run out of hearts!</p>
+    <a class="btn" href="#plans">See what’s in Pro</a>
+    <ul class="ticks">
+      <li>Maths, spelling, grammar and Spanish</li>
+      <li>Hearts, streaks, coins and pet hats</li>
+      <li>Instant marking. No account needed.</li>
+    </ul>
+  </div>
+
+  <div class="card" id="game">
+    <div class="petbar">
+      <div class="petbox">
+        <div id="hat"></div>
+        <svg id="pet" viewBox="0 0 120 120" role="img" aria-label="Your pet">
+          <circle cx="32" cy="30" r="10" fill="var(--petc)"/><circle cx="88" cy="30" r="10" fill="var(--petc)"/>
+          <ellipse cx="60" cy="70" rx="44" ry="40" fill="var(--petc)"/>
+          <ellipse cx="60" cy="84" rx="26" ry="20" fill="#fff" opacity=".35"/>
+          <g id="eyes"><circle cx="44" cy="62" r="10" fill="#fff"/><circle cx="76" cy="62" r="10" fill="#fff"/><circle cx="46" cy="63" r="5" fill="#1b2140"/><circle cx="78" cy="63" r="5" fill="#1b2140"/></g>
+          <g id="zzz" display="none" stroke="#1b2140" stroke-width="3" fill="none" stroke-linecap="round"><path d="M35 62q9 7 18 0"/><path d="M67 62q9 7 18 0"/></g>
+          <circle cx="28" cy="78" r="6" fill="#ff5d6c" opacity=".4"/><circle cx="92" cy="78" r="6" fill="#ff5d6c" opacity=".4"/>
+          <path id="mouth" d="M48 84q12 6 24 0" stroke="#1b2140" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stats">
+        <b class="nm" id="petName"></b><small id="stage"></small>
+        <div class="bar" title="XP"><b class="xp" id="xpbar"></b></div>
+        <div class="pills"><span id="lvl"></span><span id="coins"></span><span id="streak"></span><span id="mood"></span></div>
+        <div id="say" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="row"><button class="chip" id="shopBtn" aria-pressed="false">🛍 Pet shop</button></div>
+    <div class="shop" id="shop" hidden></div>
+    <div class="row" id="topics" role="group" aria-label="Topic"></div>
+    <div class="levels" id="levels" role="group" aria-label="Level"></div>
+
+    <div id="play">
+      <div class="meta"><span id="qn"></span><span id="hearts" aria-label="Hearts left"></span></div>
+      <div class="bar" aria-hidden="true"><b id="prog"></b></div>
+      <div class="q" id="q" aria-live="polite"></div>
+      <div class="opts" id="opts"></div>
+      <div class="fb"><span id="fb" aria-live="polite"></span><button class="btn sm" id="next" hidden>Next</button></div>
+    </div>
+    <div id="done" class="res" hidden></div>
+  </div>
+</div>
+
+<section id="plans"><div class="wrap">
+  <h2>Free or Pro</h2>
+  <p class="sub">Start free. Unlock everything once and keep it forever.</p>
+  <div class="plans">
+    <div class="plan"><h3>Free</h3><div class="price">£0</div>
+      <ul><li>Easy level in every topic</li><li>Medium Times Tables</li><li>Your pet, hearts and streaks</li><li>Basic pet shop</li></ul></div>
+    <div class="plan pro"><h3>Pro</h3><div class="price"><span id="price"></span> <small style="font-size:1rem;font-weight:400">one-off</small></div>
+      <ul><li>Medium, Hard and Boss levels everywhere</li><li>Up to 20 questions per round</li><li>Crown and Pro pet items</li><li>Printable certificates</li><li>All future questions free</li></ul>
+      <button class="btn sun" id="goPro">Unlock Pro</button></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <h2>Questions</h2><p class="sub">&nbsp;</p>
+  <details><summary>What ages is it for?</summary><p>Ages 6 to 11. Easy is a gentle start, and Boss is a proper challenge.</p></details>
+  <details><summary>Is progress saved?</summary><p>Yes, on the same device and browser. Clearing browser data resets the pet.</p></details>
+  <details><summary>I bought Pro. How do I unlock it?</summary><p>Press “Unlock Pro”, then type the code from your purchase email.</p></details>
+</div></section>
+</main>
+
+<footer><div class="wrap">© <span class="yr"></span> <span class="brand"></span></div></footer>
+
+<dialog id="pay" aria-labelledby="payT">
+  <h2 id="payT">🔒 Unlock Pro</h2>
+  <ul><li>Medium, Hard and Boss levels</li><li>20-question Boss rounds</li><li>Crown and Pro pet items</li></ul>
+  <p style="margin-bottom:12px"><b class="priceTxt" style="font-family:Fredoka;font-size:1.6rem"></b> one-off. No subscription.</p>
+  <a class="btn sun" id="buyLink" target="_blank" rel="noopener">Buy Pro</a>
+  <p style="margin-top:16px;font-weight:800">Already bought? Enter your code</p>
+  <input id="code" placeholder="Unlock code" autocomplete="off" aria-label="Unlock code">
+  <div class="row" style="margin:6px 0 0"><button class="btn mint sm" id="redeem">Unlock</button><button class="btn ghost sm" id="closePay">Maybe later</button></div>
+  <div id="payMsg" role="status"></div>
+</dialog>
+
+<div id="cert" aria-hidden="true"><h1>Certificate of Awesome</h1><p>Awarded to</p><div class="nm" id="cName"></div><p id="cText"></p><div style="font-size:3rem" id="cStars"></div></div>
+
+<script>
+/* ===== EDIT THESE ===== */
+const BRAND="Pocket Quizzes", PET_NAME="Bolt", PRICE="£9.99";
+const BUY_LINK="#";                 // your Etsy / Gumroad / Payhip link for Pro
+const PRO_CODES=["BOLT-2026","FAMILY-PRO"]; // codes you give buyers (see notes)
+
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=(a,n)=>shuffle(a).slice(0,n);
+function numOpts(ans,sp){const s=new Set([ans]);while(s.size<4){const v=ans+rnd(-sp,sp);if(v>=0)s.add(v)}return shuffle([...s])}
+
+/* ===== question banks ===== */
+const SP_E=[["because","becuase","becouse","becasue"],["friend","freind","frend","friand"],["necessary","neccessary","necesary","necessery"],["different","diffrent","differant","diferent"],["beautiful","beutiful","beautifull","beatiful"],["separate","seperate","separete","seprate"],["favourite","favorit","favourit","faverite"],["February","Febuary","Febrary","Februry"],["library","libary","librery","liberry"],["through","thru","throgh","thorough"],["answer","anser","answare","ansewr"],["island","iland","islend","ilsand"],["Wednesday","Wensday","Wednsday","Wendesday"],["definitely","definately","definitly","defanitely"]];
+const SP_H=[["accommodate","accomodate","acommodate","accomadate"],["embarrass","embarass","embarrasse","embarras"],["occurrence","occurence","ocurrence","occurance"],["conscience","concience","consience","conscence"],["rhythm","rythm","rhythem","rhythym"],["privilege","priviledge","privelege","privilage"],["mischievous","mischievious","mischevous","mischeivous"],["parliament","parliment","parlament","parleament"],["environment","enviroment","environmant","envirenment"],["recommend","reccomend","recomend","recommmend"],["exaggerate","exagerate","exaggarate","exagerrate"],["queue","que","queu","quewe"]];
+/* [question, options, correctIndex, minLevel 0-3] */
+const GR=[
+["Pick the correct word: “They left ___ bags at home.”",["their","there","they’re","thier"],0,0],
+["Pick the correct word: “___ going to the park.”",["Their","There","They’re","Thair"],2,0],
+["Which word is a verb?  “The dog jumped high.”",["dog","jumped","high","The"],1,0],
+["Which word is an adjective?  “A shiny red bike.”",["bike","A","shiny","is"],2,0],
+["What is the plural of “child”?",["childs","childes","children","childrens"],2,0],
+["Which is a noun?",["quickly","happy","teacher","run"],2,0],
+["Which sentence needs a question mark?",["Where is my coat","Put your coat on","What a big coat","I like my coat"],0,0],
+["Choose the correct word: “I ___ a sandwich yesterday.”",["eat","ate","eaten","eating"],1,0],
+["Choose the correct word: “She is taller ___ me.”",["then","than","that","tan"],1,1],
+["Which word means the opposite of “brave”?",["bold","fearful","strong","kind"],1,1],
+["Where does the apostrophe go? “The dogs bone” (one dog)",["dogs’ bone","dog’s bone","dogs bone’s","do’gs bone"],1,1],
+["Choose the correct word: “The dog wagged ___ tail.”",["it’s","its","its’","it is"],1,1],
+["Which sentence is in the past tense?",["I walk to school","I will walk to school","I walked to school","I am walking to school"],2,1],
+["Which is a synonym for “enormous”?",["tiny","huge","quick","quiet"],1,1],
+["Which word is an adverb?  “She sang loudly.”",["She","sang","loudly","sang loudly"],2,2],
+["Which word is a preposition?  “The cat sat under the table.”",["cat","sat","under","table"],2,2],
+["Which word is a conjunction?  “I was tired but I kept going.”",["tired","but","kept","going"],1,2],
+["Choose the correct word: “Neither of the boys ___ ready.”",["were","are","is","be"],2,3],
+["Which is a complex sentence?",["I ran.","I ran and he walked.","I ran because I was late.","Run!"],2,3],
+["Which sentence is punctuated correctly?",["“Come here,” said Mum.","“Come here” said Mum.","“Come here,” said, Mum.","Come here, said Mum."],0,3],
+["Which sentence uses “fewer” correctly?",["There is fewer milk.","There are fewer apples.","Fewer water is left.","I have fewer happy."],1,3]];
+const ES=[["gato","cat"],["perro","dog"],["casa","house"],["agua","water"],["libro","book"],["rojo","red"],["azul","blue"],["manzana","apple"],["leche","milk"],["escuela","school"],["amigo","friend"],["sol","sun"],["luna","moon"],["pan","bread"],["verde","green"],["gracias","thank you"]];
+const ES2=[["buenos días","good morning"],["buenas noches","good night"],["por favor","please"],["me llamo","my name is"],["¿cómo estás?","how are you?"],["lo siento","I am sorry"],["hasta luego","see you later"],["tengo hambre","I am hungry"],["me gusta","I like"],["¿dónde está?","where is it?"]];
+const rev=a=>a.map(x=>[x[1],x[0]]);
+function mc(q,pool,p){const o=shuffle([p[1],...pick(pool.filter(x=>x!==p),3).map(x=>x[1])]);return{q,o,a:o.indexOf(p[1])}}
+
+const TOPICS={
+ times:{label:"Times tables",gen(d){
+  let a,b,c,q,ans;
+  if(d===0){a=rnd(2,5);b=rnd(2,10);q=`${a} × ${b} = ?`;ans=a*b}
+  else if(d===1){a=rnd(2,12);b=rnd(2,12);q=`${a} × ${b} = ?`;ans=a*b}
+  else{a=rnd(3,12);b=rnd(3,12);const t=rnd(0,d===2?1:3);
+   if(t===0){q=`? × ${a} = ${a*b}`;ans=b}
+   else if(t===1){q=`${a*b} ÷ ${a} = ?`;ans=b}
+   else if(t===2){c=rnd(2,9);q=`${a} × ${b} + ${c} = ?`;ans=a*b+c}
+   else{c=rnd(2,9);q=`${a} × ${b} − ${c} = ?`;ans=a*b-c}}
+  const o=numOpts(ans,d>1?6:10);return{q,o:o.map(String),a:o.indexOf(ans)}}},
+ math:{label:"Add & subtract",gen(d){
+  let q,ans;
+  if(d<2){const big=d===1;let a=big?rnd(120,899):rnd(12,60),b=big?rnd(50,400):rnd(5,30);const add=Math.random()<.5;if(!add&&b>a)[a,b]=[b,a];q=`${a} ${add?"+":"−"} ${b} = ?`;ans=add?a+b:a-b}
+  else{const a=rnd(150,900),b=rnd(60,400),c=rnd(20,150),t=rnd(0,d===2?1:2);
+   if(t===0){q=`${a} + ? = ${a+b}`;ans=b}
+   else if(t===1){q=`${a} + ${b} − ${c} = ?`;ans=a+b-c}
+   else{q=`? − ${b} = ${a}`;ans=a+b}}
+  const o=numOpts(ans,d<2?15:9);return{q,o:o.map(String),a:o.indexOf(ans)}}},
+ spelling:{label:"Spelling",gen(d){const bank=d<2?SP_E:SP_H,w=bank[rnd(0,bank.length-1)],o=shuffle(w);return{q:"Which spelling is correct?",o,a:o.indexOf(w[0])}}},
+ grammar:{label:"Grammar",gen(d){
+  let pool=GR.filter(x=>x[3]<=d&&x[3]>=d-1);if(pool.length<8)pool=GR.filter(x=>x[3]<=d);
+  const g=pool[rnd(0,pool.length-1)],right=g[1][g[2]],o=shuffle(g[1]);return{q:g[0],o,a:o.indexOf(right)}}},
+ spanish:{label:"Spanish",gen(d){
+  const base=d===0?ES.slice(0,10):d===1?rev(ES):d===2?ES2:[...ES,...rev(ES),...ES2,...rev(ES2)];
+  const p=base[rnd(0,base.length-1)],isEs=/[áéíóúñ¿]/.test(p[0])||ES.concat(ES2).some(x=>x[0]===p[0]);
+  return mc(isEs?`What does “${p[0]}” mean?`:`How do you say “${p[0]}” in Spanish?`,base,p)}}
+};
+const LV=[{n:8,name:"Easy"},{n:12,name:"Medium"},{n:16,name:"Hard"},{n:20,name:"Boss"}];
+const FREE=(t,l)=>l===0||(t==="times"&&l===1);
+const ITEMS=[{id:"apple",i:"🍎",n:"Snack",c:5,food:30},{id:"feast",i:"🍗",n:"Feast",c:15,food:100},{id:"cap",i:"🧢",n:"Cap",c:15},{id:"top",i:"🎩",n:"Top hat",c:20},{id:"grad",i:"🎓",n:"Grad cap",c:25},{id:"crown",i:"👑",n:"Crown",c:30,pro:1}];
+
+/* ===== saved state ===== */
+let S={xp:0,coins:0,streak:0,last:"",best:{},owned:[],hat:"",mood:70,ts:Date.now(),pro:false};
+try{Object.assign(S,JSON.parse(localStorage.getItem("pq_v2")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("pq_v2",JSON.stringify(S))}catch(e){}};
+function mood(){const m=Math.max(0,Math.min(100,S.mood-Math.floor((Date.now()-S.ts)/600000)));return m}
+function setMood(v){S.mood=Math.max(0,Math.min(100,v));S.ts=Date.now()}
+
+/* ===== pet ===== */
+const FACES={happy:"M46 82q14 14 28 0",idle:"M48 84q12 6 24 0",sad:"M48 92q12-10 24 0"};
+let temp=null;
+function face(f){$("mouth").setAttribute("d",FACES[f==="sleep"?"idle":f]);$("eyes").setAttribute("display",f==="sleep"?"none":"");$("zzz").setAttribute("display",f==="sleep"?"":"none")}
+function say(t){$("say").textContent=t}
+function react(kind,t){
+  const p=$("pet");p.classList.remove("hop","sadmove");void p.getBoundingClientRect();
+  p.classList.add(kind==="happy"?"hop":"sadmove");face(kind);if(t)say(t);
+  clearTimeout(temp);temp=setTimeout(renderPet,1400);
+}
+function renderPet(){
+  const lv=Math.floor(S.xp/100)+1,st=lv<3?0:lv<6?1:2,m=mood();
+  $("pet").style.setProperty("--petc",["#23c48e","#8a6bff","#ff9f43"][st]);
+  $("petName").textContent=PET_NAME;$("stage").textContent=["Hatchling","Buddy","Champion"][st];
+  $("xpbar").style.width=(S.xp%100)+"%";
+  $("lvl").textContent="Lv "+lv;$("coins").textContent="🪙 "+S.coins;$("streak").textContent="🔥 "+S.streak;
+  $("mood").textContent=(m>60?"😊":m>30?"😐":"😢")+" "+m+"%";
+  $("hat").textContent=S.hat?ITEMS.find(x=>x.id===S.hat).i:"";
+  face(hearts===0&&playing?"sleep":m<30?"sad":m>75?"happy":"idle");
+}
+function renderShop(){
+  $("shop").innerHTML=ITEMS.map(it=>{
+    const own=S.owned.includes(it.id),sub=it.pro&&!S.pro?"🔒 Pro":own?(S.hat===it.id?"Wearing":"Wear"):"🪙 "+it.c;
+    return `<button data-id="${it.id}"><span>${it.i}</span>${it.n}<br><small>${sub}</small></button>`}).join("");
+  [...$("shop").children].forEach(b=>b.onclick=()=>shopClick(ITEMS.find(x=>x.id===b.dataset.id)));
+}
+function shopClick(it){
+  if(it.pro&&!S.pro)return openPay();
+  if(it.food){if(S.coins<it.c)return say("Not enough coins yet. Keep answering!");S.coins-=it.c;setMood(mood()+it.food);react("happy","Yum! Thank you!")}
+  else if(S.owned.includes(it.id)){S.hat=S.hat===it.id?"":it.id}
+  else{if(S.coins<it.c)return say("Not enough coins yet. Keep answering!");S.coins-=it.c;S.owned.push(it.id);S.hat=it.id;react("happy","Looking sharp!")}
+  save();renderPet();renderShop();
+}
+$("shopBtn").onclick=()=>{const o=$("shop").hidden;$("shop").hidden=!o;$("shopBtn").setAttribute("aria-pressed",o);if(o)renderShop()};
+
+/* ===== paywall ===== */
+function openPay(){$("payMsg").textContent="";$("code").value="";$("pay").showModal()}
+$("goPro").onclick=openPay;$("closePay").onclick=()=>$("pay").close();
+$("redeem").onclick=()=>{
+  const c=$("code").value.trim().toUpperCase();
+  if(PRO_CODES.includes(c)){S.pro=true;save();$("payMsg").textContent="Pro unlocked! 🎉";setTimeout(()=>{$("pay").close();buildLevels();renderShop();renderPet();say("Pro unlocked! Let’s go!")},900)}
+  else $("payMsg").textContent="That code doesn’t match. Check your purchase email.";
+};
+try{const u=new URLSearchParams(location.search).get("code");if(u&&PRO_CODES.includes(u.toUpperCase())){S.pro=true;save()}}catch(e){}
+
+/* ===== game ===== */
+let topic="times",lvl=0,n=0,score=0,hearts=5,locked=false,playing=false,seen=new Set();
+const isLocked=(t,l)=>!S.pro&&!FREE(t,l);
+function buildTopics(){
+  $("topics").innerHTML="";
+  Object.entries(TOPICS).forEach(([k,t])=>{const b=document.createElement("button");b.className="chip";b.textContent=t.label;b.setAttribute("aria-pressed",k===topic);b.onclick=()=>{topic=k;if(isLocked(k,lvl))lvl=0;buildTopics();buildLevels();start()};$("topics").appendChild(b)});
+}
+function buildLevels(){
+  $("levels").innerHTML="";
+  LV.forEach((L,i)=>{const b=document.createElement("button"),st=S.best[topic+i]||0,lk=isLocked(topic,i);
+    b.className="lv"+(lk?" lock":"");b.setAttribute("aria-pressed",i===lvl&&!lk);
+    b.innerHTML=`${lk?"🔒 ":""}${L.name}<small>${lk?"Pro":st?"⭐".repeat(st):L.n+" Qs"}</small>`;
+    b.onclick=()=>{if(lk)return openPay();lvl=i;buildLevels();start()};$("levels").appendChild(b)});
+}
+function start(){
+  n=0;score=0;hearts=5;playing=true;seen.clear();
+  $("done").hidden=true;$("play").hidden=false;renderPet();ask();
+}
+function ask(){
+  locked=false;let it,t=0;
+  do{it=TOPICS[topic].gen(lvl);t++}while(seen.has(it.q)&&t<40);
+  seen.add(it.q);n++;
+  $("qn").textContent=`Question ${n} of ${LV[lvl].n}`;
+  $("hearts").textContent="❤️".repeat(hearts)+"🖤".repeat(5-hearts);
+  $("prog").style.width=((n-1)/LV[lvl].n*100)+"%";
+  $("q").textContent=it.q;$("fb").textContent="";$("next").hidden=true;
+  const box=$("opts");box.innerHTML="";
+  it.o.forEach((txt,i)=>{const b=document.createElement("button");b.className="opt";b.textContent=txt;b.onclick=()=>answer(i,it,b);box.appendChild(b)});
+}
+function answer(i,it,btn){
+  if(locked)return;locked=true;
+  const all=[...$("opts").children];all.forEach(b=>b.disabled=true);
+  let out=false;
+  if(i===it.a){
+    score++;S.xp+=10;S.coins+=1;setMood(mood()+2);btn.classList.add("right");
+    $("fb").textContent=["Nice one! 🎉","Correct! 🔥","Spot on! ⭐","Yes! 💪"][rnd(0,3)];
+    react("happy",["Woohoo!","You’re smart!","Yum, brain food!"][rnd(0,2)]);
+  }else{
+    hearts--;btn.classList.add("wrong");all[it.a].classList.add("right");
+    $("fb").textContent=`Not quite. The answer is ${it.o[it.a]}.`;
+    react("sad",hearts?"Oops. Keep going!":"I need a nap…");
+    out=hearts===0;
+  }
+  $("hearts").textContent="❤️".repeat(hearts)+"🖤".repeat(5-hearts);
+  $("prog").style.width=(n/LV[lvl].n*100)+"%";save();
+  const nx=$("next");nx.hidden=false;nx.focus();
+  nx.textContent=out||n===LV[lvl].n?"See my score":"Next";
+  nx.onclick=()=>{out||n===LV[lvl].n?finish(out):ask()};
+}
+function finish(failed){
+  playing=false;$("play").hidden=true;
+  const N=LV[lvl].n,pct=score/N,stars=failed?0:pct>=.9?3:pct>=.7?2:pct>=.5?1:0;
+  S.xp+=stars?20:0;S.coins+=stars>=2?5:0;
+  if(stars>(S.best[topic+lvl]||0))S.best[topic+lvl]=stars;
+  const today=new Date().toDateString();
+  if(S.last!==today){S.streak=new Date(Date.now()-864e5).toDateString()===S.last?S.streak+1:1;S.last=today}
+  save();buildLevels();renderPet();
+  const msg=failed?"Out of hearts. Bolt needs a rest. Try again!":stars===3?"Superstar! Amazing work.":stars===2?"Great job!":stars===1?"Good effort. Aim for more stars!":"Every champion starts somewhere.";
+  const next=lvl<3,nl=next&&isLocked(topic,lvl+1);
+  const d=$("done");d.hidden=false;
+  d.innerHTML=`<div class="stars" aria-label="${stars} of 3 stars">${"⭐".repeat(stars)}${"☆".repeat(3-stars)}</div>
+   <h3>${score} / ${N}</h3><p>${msg}<br>+${score*10+(stars?20:0)} XP · +${score+(stars>=2?5:0)} coins</p>
+   ${stars&&S.pro?'<input id="nameIn" placeholder="Name for certificate" maxlength="24" aria-label="Name for certificate">':""}
+   <div class="row"><button class="btn mint" id="again">Play again</button>
+   ${next&&stars?`<button class="btn sun" id="nextL">${nl?"🔒 ":""}Next level</button>`:""}
+   ${stars&&S.pro?'<button class="btn ghost" id="print">Certificate</button>':""}</div>
+   ${stars&&!S.pro?'<p>Pro members can print a certificate.</p>':""}`;
+  $("again").onclick=start;
+  if($("nextL"))$("nextL").onclick=()=>{if(nl)return openPay();lvl++;buildLevels();start()};
+  if($("print"))$("print").onclick=()=>{$("cName").textContent=$("nameIn").value.trim()||"A Quiz Champion";$("cText").textContent=`${score}/${N} in ${TOPICS[topic].label} (${LV[lvl].name})`;$("cStars").textContent="⭐".repeat(stars);window.print()};
+  react(stars?"happy":"sad",stars?"We did it!":"Let’s try again!");
+}
+
+/* ===== init ===== */
+document.querySelectorAll(".brand").forEach(e=>e.textContent=BRAND);
+document.querySelectorAll(".yr").forEach(e=>e.textContent=new Date().getFullYear());
+document.querySelectorAll(".priceTxt").forEach(e=>e.textContent=PRICE);
+$("price").textContent=PRICE;$("buyLink").href=BUY_LINK;
+setMood(mood());
+buildTopics();buildLevels();start();
+say(mood()<30?"I’m hungry! Answer questions to earn coins.":"Hi! Let’s learn together.");
+</script>
+</body>
+</html>
